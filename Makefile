@@ -8,12 +8,15 @@
 ## Created On      : Sun Jan 11 21:03:31 2026
 ## 
 ## Last Modified By: Mats
-## Last Modified On: Sun Jan 11 22:39:13 2026
-## Update Count    : 7
+## Last Modified On: Sat Jan 17 10:46:30 2026
+## Update Count    : 13
 ###############################################################################
 
 
 LDLIBS = -ltinyxml2
+LDFLAGS = -g
+
+CXXFLAGS = -g
 
 CC=g++
 

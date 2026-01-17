@@ -8,8 +8,8 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Fri Jan 16 22:23:01 2026
-// Update Count    : 170
+// Last Modified On: Sat Jan 17 21:50:04 2026
+// Update Count    : 212
 // 
 
 
@@ -25,11 +25,66 @@ using namespace std;
 using namespace tinyxml2;
 
 
+// -----------------------------------------------------------------------------
+// Misc
+
+int opt_d = 1;				// Debug prints.
+int opt_v = 1;				// Verbose mode.
+
+
+#if 1
+#define MYASSERT( P ) do{myassert(P,#P,__PRETTY_FUNCTION__);}while(0)
+#define DOUT if(1)cout
+#else
+#define MYASSERT( P ) do{}while(0)
+#define DOUT if(0)cout
+#endif
+void myassert(int predicate, const char* pstr, const char* s)
+{
+    if ( !predicate ) {
+	cout << endl << "ASSERT(" << pstr << ") failed at " << s << endl;
+	abort();
+    }
+}
+
+
+
 #define LLE(x) cout << #x << " = " << x << endl
 
+#define LL() do{cout<<__PRETTY_FUNCTION__<<endl;}while(0)
+#define PP(X) do{for(unsigned i=(X);i;--i)cout << "  ";}while(0)
+
+
+int
+in_set(char c, const char* s)
+{
+    while ( *s ) {
+	if ( c == *s ) return 1;
+	++s;
+    }
+    return 0;
+}
+
+
+
+void
+skip_ws( const char* &s )
+{
+    while ( in_set( *s, " \t\n\r," ) )
+	++s;
+}
+
+
+// -----------------------------------------------------------------------------
+// Classes to parse SVG and hold SVG data
 
 class SVGPathToken {
+    // Path Data token :: ([MmLl...] | number)
 public:
+    char c;				// 0 or one of MmLlHhVvCcZzQq...
+    double d;				// number iff c==0
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - 
     SVGPathToken() : c(0), d(0) {};
     SVGPathToken(char cc) : c(cc), d(0) {};
     SVGPathToken(double dd) : c(0), d(dd) {};
@@ -44,8 +99,6 @@ public:
 	return os;
     };
     
-    char c;				// 0 or one of MmLlHhVvCcZz
-    double d;				// number iff c==0
 };
 
 ostream& operator<<(ostream& os, const SVGPathToken& x) {
@@ -55,11 +108,16 @@ ostream& operator<<(ostream& os, const SVGPathToken& x) {
 
 
 typedef deque<SVGPathToken> SVGPathTokenList_t;
+typedef SVGPathTokenList_t::const_iterator SVGPathTLIter_t;
 
 class SVGPathTokens {
 public:
+    SVGPathTokenList_t tl;
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - 
     SVGPathTokens() : tl() {};
 
+    // Parse the path "d" attribute into a list of tokens.
     void parse( const char* s );
     
     ostream& cvs(ostream& os) const {
@@ -72,29 +130,12 @@ public:
 	return os;
     };
 
-    SVGPathTokenList_t tl;
 };
 
 ostream& operator<<(ostream& os, const SVGPathTokens& x) {
     return x.cvs(os);
 }
 
-int
-in_set(char c, const char* s)
-{
-    while ( *s ) {
-	if ( c == *s ) return 1;
-	++s;
-    }
-    return 0;
-}
-
-void
-skip_ws( const char* &s )
-{
-    while ( in_set( *s, " \t\n\r," ) )
-	++s;
-}
 
 
 void
@@ -161,12 +202,17 @@ SVGPathTokens::parse( const char* s )
 }
 
 
+
+// -----------------------------------------------------------------------------
+// Classes for internal SVG represenation
+
 class SVGPoint {
 public:
     SVGPoint(double ax=0, double ay=0) : x(ax), y(ay) {};
     double x;
     double y;
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - 
     int parse(SVGPathTokenList_t::const_iterator i,
 	      SVGPathTokenList_t::const_iterator end);
 
@@ -186,7 +232,8 @@ ostream& operator<<( ostream& os, const SVGPoint& x) {
 int
 SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
 		SVGPathTokenList_t::const_iterator end)
-// Create a point from two numbers in a token list.  Return no of tokens conusumed (0 or 2).
+// Create a point from two numbers in a token list.
+// Return no of tokens conusumed (0 or 2).
 {
 
     if ( i == end ) return 0;
@@ -205,6 +252,8 @@ int
 SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
 		SVGPathTokenList_t::const_iterator end,
 		unsigned N, SVGPoint* p)
+// Create N points from 2*N tokens in a token list.
+// Returns no of tokens consumed, 0 or 2*N
 {
     int n = 0;
     int j;
@@ -235,7 +284,10 @@ ostream& operator<<( ostream& os, const SVGPointList_t& x) {
 
 class SVGPathSection {
 public:
-    
+    char pst;				// Type of path section PST_XXX
+    SVGPointList_t pl;			// List of points of the path.
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - 
 #define PST_NONE	'?'		// pl.size() == 0
 #define PST_Moveto	'M'		// pl.size() == N
 #define PST_MovetoR	'm'		// pl.size() == N
@@ -265,9 +317,6 @@ public:
     ostream& cvs( ostream& os ) const {
 	return os << pst << pl;
     }
-
-    char pst;
-    SVGPointList_t pl;
 };
 ostream& operator<<( ostream& os, const SVGPathSection& x) {
     return x.cvs(os);
@@ -289,42 +338,8 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 	pst = PST_Closepath;
 	return 1;
     }
-
-    else if ( in_set( i->c, "MmLlTt" ) ) { // <X> Point+
-	int n = 0;			 // No of tokens consumed.
-	int m = 0;
-	
-	pst = i->c;
-	++i;
-	++n;
-
-	SVGPoint p;
-	m = p.parse(i,end);
-	if ( m != 2 ) return -1;
-	i += 2;
-	n += 2;
-	pl.push_back( p );
-
-	while ( i != end ) {
-	    m = p.parse(i,end);
-	    if ( m == 2 ) {
-		i += 2;
-		n += 2;
-		pl.push_back( p );
-	    }
-	    else if ( m == 0 ) {
-		// OK end of points.
-		break;
-	    }
-	    else {
-		// Should not happen.
-		abort();
-	    }
-	}
-	return n;
-    }
-
-    else if ( in_set( i->c, "CcSsQq" ) ) { // <X> (3xPoint)+
+    
+    else if ( in_set( i->c, "MmLlTtCcSsQq" ) ) { // <X> (3xPoint)+
 	int n = 0;
 	int m = 0;
 	int k;
@@ -342,6 +357,14 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 	case 'q':
 	    k_max = 2;
 	    break;
+	case 'M':
+	case 'm':
+	case 'L':
+	case 'l':
+	case 'T':
+	case 't':
+	    k_max = 1;
+	    break;
 	default:
 	    abort();
 	};
@@ -350,6 +373,7 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 	++i;
 	++n;
 
+	MYASSERT( k <= 3 );
 
 	k = SVGPoint::parse(i,end, k_max, p);
 	if ( k != 2*k_max ) return -1;
@@ -360,9 +384,7 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 
 	while ( i != end ) {
 	    if ( i->c != 0 ) break;
-	    LLE(n);
 	    k = SVGPoint::parse(i,end, k_max, p);
-	    LLE(k);
 	    if ( k != 2*k_max ) return -1;
 	    n += k;
 	    i += k;
@@ -370,6 +392,36 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 		pl.push_back( p[k] );
 	}
 	return n;
+    }
+
+    else if (in_set( i->c, "HhVv" )) {
+	int n = 0;
+	SVGPoint p;
+	
+	pst = i->c;
+	++i;
+	++n;
+
+	if ( i->c != 0 )
+	    return -1;
+
+	if ( pst == 'H' || pst == 'h' ) {
+	    p.x = i->d;
+	    p.y = 0;
+	}
+	else {
+	    p.x = 0;
+	    p.y = i->d;
+	}
+	++i;
+	++n;
+
+	pl.push_back( p );
+	
+	return n;
+    }
+    else {
+	abort();
     }
 
     return 0;
@@ -381,6 +433,9 @@ typedef deque<SVGPathSection> SVGPathSectionList_t;
 
 class SVGPath {
 public:    
+    SVGPathSectionList_t	psl;
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - 
     SVGPath() {};
 
     int parse( const SVGPathTokens& pt);
@@ -388,8 +443,6 @@ public:
     void clear() {
 	psl.clear();
     };
-    
-    SVGPathSectionList_t	psl;
 
     ostream& cvs(ostream& os) const {
 	SVGPathSectionList_t::const_iterator i;
@@ -426,23 +479,30 @@ SVGPath::parse(const SVGPathTokens& pt)
 }
 
 
-
-
-
+
+// -----------------------------------------------------------------------------
+// Visitor related classes
 
 class Context {
+    // Stack of name spaces.
 public:
-    Context() : s(), prev(0) {};
-    
     string s;
-
     Context* prev;
+
+    Context() : s(), prev(0) {};
 };
 
+typedef deque<string> NSStack_t;
 
 
 class MyVisitor : public XMLVisitor {
  public:
+    unsigned	lvl;			// Hierarchical level of elements
+    NSStack_t	nss;			// Napespace Stack.
+
+    // List of paths here.
+
+    // - - - - - - - - - - - - - - - 
     MyVisitor();
     bool VisitEnter(const XMLDocument& x);
     bool VisitExit(const XMLDocument& x);
@@ -458,48 +518,53 @@ class MyVisitor : public XMLVisitor {
     void path(const XMLElement& e, const XMLAttribute* a);
 
     
-    unsigned lvl;
-
-    Context* ctx;
     
  private:
     MyVisitor(const MyVisitor& );
     MyVisitor& operator=( const MyVisitor& );
 };
 
-MyVisitor::MyVisitor() : XMLVisitor(), lvl(0), ctx(0) {};
 
-#define LL() do{cout<<__PRETTY_FUNCTION__<<endl;}while(0)
-#define PP(X) do{for(unsigned i=(X);i;--i)cout << "  ";}while(0)
 
-bool MyVisitor::VisitEnter(const XMLDocument& x)
+MyVisitor::MyVisitor()
+: XMLVisitor(), lvl(0), nss()
 {
-    while ( ctx ) {
-	Context* x = ctx;
-	ctx = x->prev;
-	delete x ;
-    }
-    ctx = new Context();
-    
+    // EMPTY
+};
+
+
+
+bool
+MyVisitor::VisitEnter(const XMLDocument& x)
+{
+    MYASSERT( nss.empty() );
+
+    nss.push_front( string("") );
     lvl =0;
-    cout << "-------------------------------------------------------" << endl
-	 << "BEGIN Document (" << lvl << ")" << endl;
+
+    if ( opt_d ) {
+	DOUT << "------------------------------------------------------" << endl
+	     << "BEGIN Document (" << lvl << ")" << endl;
+    }
+    
     ++lvl;
     return true;
 }
 
-bool MyVisitor::VisitExit(const XMLDocument& x)  
+
+
+bool
+MyVisitor::VisitExit(const XMLDocument& x)  
 {
     if(lvl) --lvl;
 
-    while ( ctx ) {
-	Context* x = ctx;
-	ctx = x->prev;
-	delete x ;
+    nss.clear();
+
+    if ( opt_d ) {
+	DOUT << "END Document (" << lvl << ")" << endl
+	     << "-----------------------------------------------------" << endl;
     }
 
-    cout << "END Document (" << lvl << ")" << endl
-	 << "-------------------------------------------------------" << endl;
     return true;
 }
 
@@ -507,7 +572,10 @@ bool MyVisitor::VisitExit(const XMLDocument& x)
 
 void
 MyVisitor::group(const XMLAttribute* a)
-{    
+{
+    if ( !opt_d )
+	return;
+    
     while (a) {
 	const char* aname = a->Name();
 	do {
@@ -525,6 +593,9 @@ MyVisitor::group(const XMLAttribute* a)
 void
 MyVisitor::rect(const XMLAttribute* a)
 {
+    if ( !opt_d )
+	return;
+
     while (a) {
 	const char* aname = a->Name();
 	do {
@@ -545,29 +616,33 @@ MyVisitor::path(const XMLElement& e, const XMLAttribute* a)
 {
     const char* str = e.Attribute("d");
 
-    // Temp, print attributes.
-    while (a) {
-	const char* aname = a->Name();
-	do {
-	    if ( !strcmp(aname,"style") ) break;
-	    if ( !strcmp(aname,"sodipodi:nodetypes") ) break;
-	    
-	    PP(lvl);
-	    cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
-	} while(0);
-	a = a->Next();
+    if ( opt_d ) {
+	while (a) {
+	    const char* aname = a->Name();
+	    do {
+		if ( !strcmp(aname,"style") ) break;
+		if ( !strcmp(aname,"sodipodi:nodetypes") ) break;
+		
+		PP(lvl);
+		cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
+	    } while(0);
+	    a = a->Next();
+	}
     }
 
     // Handle the path data
     if( str ) {
 	SVGPathTokens pt;
 	pt.parse( str );
-	cout << "d=" << '"' << str << '"' << endl
-	     << "path tokens = " << pt << endl;
+	if ( opt_d )
+	    cout << "d=" << '"' << str << '"' << endl
+		 << "path tokens = " << pt << endl;
 
 	SVGPath p;
 	p.parse( pt );
-	cout << "path = " << p << endl;
+
+	if ( opt_d )
+	    cout << "path = " << p << endl;
     }
 }
 
@@ -583,35 +658,43 @@ remove_ws( string& s )
 }
 
 
+
 bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 {
     const char* name = x.Name();
 
-    PP(lvl);
-    cout << "BEGIN " << ctx->s << " " << x.Name() << endl;
+    if ( opt_d ) {
+	PP(lvl);
+	cout << "BEGIN '" << nss.front() << "' " << x.Name() << endl;
+    }
+    
     ++lvl;
 
     if ( !strcmp(name,"g") ) {
-	Context* new_ctx = new Context();
-	new_ctx->s = ctx->s;
-	if  ( !ctx->s.empty() )
-	    new_ctx->s += "_";
+
 	const char* id = x.Attribute("inkscape:label");
-	if ( !id)
-	    id = x.Attribute("id");
-	if ( id )
-	    new_ctx->s += id;
-	new_ctx->prev= ctx;
-	ctx = new_ctx;
-	remove_ws( ctx->s );
+	if ( id ) {
+	    string s = nss.front();
+	    s += '_';
+	    s += id;
+	    remove_ws( s );
+	    nss.push_front( string( s ) );
+	}
+	else{
+	    // If this group is not a namespace, use the previous.
+	    nss.push_front( nss.front() );
+	}
 	group(a);
     }
+
     else if ( !strcmp(name,"rect") ) {
 	rect(a);
     }
+
     else if ( !strcmp(name,"path") ) {
 	path(x,a);
     }
+    
     else if ( !strcmp(name,"svg") ||
 	      !strcmp(name,"sodipodi:namedview") ||
 	      !strcmp(name,"inkscape:grid") ||
@@ -622,35 +705,42 @@ bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 	// IGNORE
     }
     else {
-	while (a) {
-	    PP(lvl);
-	    cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
-	    a = a->Next();
-	}	
+	if ( opt_v ) {
+	    cout << "Unrecognised element: " << endl;
+	    while (a) {
+		PP(lvl);
+		cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
+		a = a->Next();
+	    }
+	}
     }
     return true;
 }
+
+
 
 bool MyVisitor::VisitExit(const XMLElement& x)
 {
     const char* name = x.Name();
     if ( !strcmp(name,"g") ) {
-	if ( ctx) {
-	    Context* x = ctx;
-	    ctx = x->prev;
-	    delete( x );
-	}
+	nss.pop_front();
     }
     --lvl;
-    PP(lvl);
-    cout << "END " << ctx->s << " " << x.Name() << endl;
+
+    if ( opt_d ) {
+	PP(lvl);
+	cout << "END " << nss.front() << " " << x.Name() << endl;
+    }
+    
     return true;
 }
 
 bool MyVisitor::Visit(const XMLText& x) 
 {
-    PP(lvl);
-    cout << '"' << x.Value()  << '"' << endl;
+    if ( opt_d ) {
+	PP(lvl);
+	cout << '"' << x.Value()  << '"' << endl;
+    }
     return true;
 }
 
@@ -672,6 +762,7 @@ bool MyVisitor::Visit(const XMLUnknown& x)
 
 
 
+// -----------------------------------------------------------------------------
 
 int
 main(int argc, const char** argv)
@@ -686,14 +777,21 @@ main(int argc, const char** argv)
 	exit(-1);
     }
     
-    cout << "Loading:" << argv[1] << endl;
+    if ( opt_d )
+	cout << "Loading:" << argv[1] << endl;
+
     err = doc.LoadFile( argv[1] );
-    cout<< "err = " << err << endl;
-    cout << "doc======================================================"<< endl;
-  // doc.Accept( &printer );
-  // cout << "========================================================="<< endl;
+
+    if ( opt_d ) {
+	cout<< "err = " << err << endl;
+	cout << "doc==================================================="<< endl;
+    }
+
     doc.Accept( &myvisitor );
-    cout << "========================================================="<< endl;
+
+    if ( opt_d ) {
+	cout << "======================================================"<< endl;
+    }
     
     return 0;
 }
