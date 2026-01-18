@@ -8,8 +8,8 @@
 ## Created On      : Sun Jan 11 21:03:31 2026
 ## 
 ## Last Modified By: Mats
-## Last Modified On: Sat Jan 17 10:46:30 2026
-## Update Count    : 13
+## Last Modified On: Sun Jan 18 13:58:44 2026
+## Update Count    : 15
 ###############################################################################
 
 
@@ -20,9 +20,14 @@ CXXFLAGS = -g
 
 CC=g++
 
+.PHONY : clean
+
 all: svg2scad
 
 svg2scad: svg2scad.o
 
 svg2scad.o: svg2scad.cpp
 
+
+clean:
+	rm *.o *~ svg2scad

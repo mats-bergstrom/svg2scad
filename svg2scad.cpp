@@ -8,16 +8,18 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Sat Jan 17 21:50:04 2026
-// Update Count    : 212
+// Last Modified On: Sun Jan 18 13:32:59 2026
+// Update Count    : 251
 // 
 
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <stdio.h>
 #include <string>
 #include <deque>
+#include <cstdlib>
 
 #include<tinyxml2.h>
 
@@ -106,11 +108,10 @@ ostream& operator<<(ostream& os, const SVGPathToken& x) {
 }
 
 
-
 typedef deque<SVGPathToken> SVGPathTokenList_t;
 typedef SVGPathTokenList_t::const_iterator SVGPathTLIter_t;
 
-class SVGPathTokens {
+class SVGPathTokens {			// TODO: Remove just use SVGPathTokenList_t
 public:
     SVGPathTokenList_t tl;
 
@@ -132,10 +133,14 @@ public:
 
 };
 
+
+
+
+
+
 ostream& operator<<(ostream& os, const SVGPathTokens& x) {
     return x.cvs(os);
 }
-
 
 
 void
@@ -219,59 +224,24 @@ public:
     static int parse(SVGPathTokenList_t::const_iterator i,
 		     SVGPathTokenList_t::const_iterator end,
 		     unsigned N, SVGPoint* p);
+
+    SVGPoint& operator += (const SVGPoint& q) {
+	x += q.x;
+	y += q.y;
+	return *this;
+    }
     
     ostream& cvs( ostream& os ) const {
 	return os << '(' << x << ',' << y << ')';
     };
 };
 
+
+typedef deque<SVGPoint> SVGPointList_t;
+
 ostream& operator<<( ostream& os, const SVGPoint& x) {
     return x.cvs(os);
 }
-
-int
-SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
-		SVGPathTokenList_t::const_iterator end)
-// Create a point from two numbers in a token list.
-// Return no of tokens conusumed (0 or 2).
-{
-
-    if ( i == end ) return 0;
-    if ( i->c ) return 0;
-    x = i->d;
-    ++i;
-
-    if ( i == end ) return 0;
-    if ( i->c ) return 0;
-    y = i->d;
-
-    return 2;
-}
-
-int
-SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
-		SVGPathTokenList_t::const_iterator end,
-		unsigned N, SVGPoint* p)
-// Create N points from 2*N tokens in a token list.
-// Returns no of tokens consumed, 0 or 2*N
-{
-    int n = 0;
-    int j;
-    for ( j = 0; j < N; ++j ) {
-	int k = p->parse(i,end);
-	if ( k != 2 ) return 0;
-	++p;
-	n += 2;
-	i += 2;
-    }
-    return n;
-}
-
-    
-
-
-
-typedef deque<SVGPoint> SVGPointList_t;
 ostream& operator<<( ostream& os, const SVGPointList_t& x) {
     SVGPointList_t::const_iterator i = x.begin();
     SVGPointList_t::const_iterator end = x.end();
@@ -318,10 +288,58 @@ public:
 	return os << pst << pl;
     }
 };
+
+
+
+
+
 ostream& operator<<( ostream& os, const SVGPathSection& x) {
     return x.cvs(os);
 }
 
+
+
+int
+SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
+		SVGPathTokenList_t::const_iterator end)
+// Create a point from two numbers in a token list.
+// Return no of tokens conusumed (0 or 2).
+{
+
+    if ( i == end ) return 0;
+    if ( i->c ) return 0;
+    x = i->d;
+    ++i;
+
+    if ( i == end ) return 0;
+    if ( i->c ) return 0;
+    y = i->d;
+
+    return 2;
+}
+
+
+
+int
+SVGPoint::parse(SVGPathTokenList_t::const_iterator i,
+		SVGPathTokenList_t::const_iterator end,
+		unsigned N, SVGPoint* p)
+// Create N points from 2*N tokens in a token list.
+// Returns no of tokens consumed, 0 or 2*N
+{
+    int n = 0;
+    int j;
+    for ( j = 0; j < N; ++j ) {
+	int k = p->parse(i,end);
+	if ( k != 2 ) return 0;
+	++p;
+	n += 2;
+	i += 2;
+    }
+    return n;
+}
+
+    
 
 int
 SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
@@ -432,7 +450,8 @@ SVGPathSection::parse(SVGPathTokenList_t::const_iterator i,
 typedef deque<SVGPathSection> SVGPathSectionList_t;
 
 class SVGPath {
-public:    
+public:
+    string			name;
     SVGPathSectionList_t	psl;
 
     // - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -444,9 +463,12 @@ public:
 	psl.clear();
     };
 
+    
+    ostream& print_scad( ostream& os ) const;
+    
     ostream& cvs(ostream& os) const {
 	SVGPathSectionList_t::const_iterator i;
-	os << "{ ";
+	os << name << " { ";
 	for(i=psl.begin(); i != psl.end();++i ) {
 	    os << *i << ' ';
 	}
@@ -457,6 +479,10 @@ public:
 ostream& operator<<( ostream& os, const SVGPath& x) {
     return x.cvs(os);
 }
+
+
+
+
 
 int
 SVGPath::parse(const SVGPathTokens& pt)
@@ -483,23 +509,16 @@ SVGPath::parse(const SVGPathTokens& pt)
 // -----------------------------------------------------------------------------
 // Visitor related classes
 
-class Context {
-    // Stack of name spaces.
-public:
-    string s;
-    Context* prev;
 
-    Context() : s(), prev(0) {};
-};
-
-typedef deque<string> NSStack_t;
-
+typedef deque<string>  NSStack_t;	// Stack of all namespaces.
+typedef deque<SVGPath> PathList_t;	// List of all SVGPatchs.
 
 class MyVisitor : public XMLVisitor {
  public:
     unsigned	lvl;			// Hierarchical level of elements
     NSStack_t	nss;			// Napespace Stack.
-
+    PathList_t  pl;			// List of all SVGPaths.
+    
     // List of paths here.
 
     // - - - - - - - - - - - - - - - 
@@ -513,11 +532,11 @@ class MyVisitor : public XMLVisitor {
     bool Visit(const XMLComment& x);
     bool Visit(const XMLUnknown& x);
 
-    void group(const XMLAttribute* a);
-    void rect(const XMLAttribute* a);
-    void path(const XMLElement& e, const XMLAttribute* a);
+    void print_group(const XMLAttribute* a);
+    void print_rect(const XMLAttribute* a);
+    void print_path(const XMLElement& e, const XMLAttribute* a);
 
-    
+    ostream& print_scad(ostream& os) const;
     
  private:
     MyVisitor(const MyVisitor& );
@@ -571,7 +590,7 @@ MyVisitor::VisitExit(const XMLDocument& x)
 
 
 void
-MyVisitor::group(const XMLAttribute* a)
+MyVisitor::print_group(const XMLAttribute* a)
 {
     if ( !opt_d )
 	return;
@@ -591,7 +610,7 @@ MyVisitor::group(const XMLAttribute* a)
 
 
 void
-MyVisitor::rect(const XMLAttribute* a)
+MyVisitor::print_rect(const XMLAttribute* a)
 {
     if ( !opt_d )
 	return;
@@ -612,7 +631,7 @@ MyVisitor::rect(const XMLAttribute* a)
 
 
 void
-MyVisitor::path(const XMLElement& e, const XMLAttribute* a)
+MyVisitor::print_path(const XMLElement& e, const XMLAttribute* a)
 {
     const char* str = e.Attribute("d");
 
@@ -628,21 +647,6 @@ MyVisitor::path(const XMLElement& e, const XMLAttribute* a)
 	    } while(0);
 	    a = a->Next();
 	}
-    }
-
-    // Handle the path data
-    if( str ) {
-	SVGPathTokens pt;
-	pt.parse( str );
-	if ( opt_d )
-	    cout << "d=" << '"' << str << '"' << endl
-		 << "path tokens = " << pt << endl;
-
-	SVGPath p;
-	p.parse( pt );
-
-	if ( opt_d )
-	    cout << "path = " << p << endl;
     }
 }
 
@@ -684,15 +688,50 @@ bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 	    // If this group is not a namespace, use the previous.
 	    nss.push_front( nss.front() );
 	}
-	group(a);
+
+	if ( opt_v ) {
+	    PP(lvl);
+	    cout << "group " << nss.front() << endl;
+	}
+	print_group(a);
     }
 
     else if ( !strcmp(name,"rect") ) {
-	rect(a);
+	print_rect(a);
     }
 
     else if ( !strcmp(name,"path") ) {
-	path(x,a);
+	const char* id = x.Attribute("inkscape:label");
+	const char* d_str = x.Attribute("d");
+	if ( id && d_str ) {
+	    SVGPathTokens pt;
+	    pt.parse( d_str );
+	    if ( opt_d )
+		cout << "d=" << '"' << d_str << '"' << endl
+		     << "path tokens = " << pt << endl;
+
+	    SVGPath p;
+	    p.name = nss.front();
+	    while ( !p.name.empty() && p.name[0] == '_' )
+		p.name = p.name.substr(1);
+	    p.name += '_';
+	    p.name += id;
+	    p.parse( pt );
+
+	    if ( !p.psl.empty() )
+		pl.push_front( p );
+		
+	    if ( opt_d )
+		cout << "path = " << p << endl;
+
+	    if ( opt_v ) {
+		PP(lvl);
+		cout << "path " << id << " : " << pl.front().name
+		     << " length=" << pl.front().psl.size() << endl;
+	    }
+	
+	}
+	print_path(x,a);
     }
     
     else if ( !strcmp(name,"svg") ||
@@ -761,7 +800,86 @@ bool MyVisitor::Visit(const XMLUnknown& x)
 }
 
 
+
+// -----------------------------------------------------------------------------
+// scad output
 
+ostream&
+SVGPath::print_scad( ostream& os ) const
+{
+    SVGPoint	cp;			// Current point.
+    SVGPoint	ip;			// Initial Point
+    SVGPoint    p;
+    SVGPoint	p_min;
+    SVGPoint	p_max;
+    
+    bool	has_ip = false;
+
+    
+    SVGPathSectionList_t::const_iterator i = psl.begin();
+    SVGPathSectionList_t::const_iterator imax = psl.end();
+    os << name << " =  [" << endl;
+    while( i != imax ) {
+	SVGPointList_t::const_iterator j =i->pl.begin();
+	SVGPointList_t::const_iterator jmax =i->pl.end();
+	while ( j != jmax ) {
+	    p = *j;
+	    if ( i->pst == PST_NONE ) {
+		os << "  // '?'" << endl;
+	    }
+	    else if ( i-> pst == PST_Moveto ) {
+
+	    }
+	    else if ( i-> pst == PST_MovetoR ) {
+		p += cp;
+	    }
+	    else {
+		os << "  // " << i->pst << " NOT handled" << endl;		
+	    }
+	    
+	    if ( !has_ip ) {
+		has_ip = true;
+		ip = p;
+		p_min = p;
+		p_max = p;
+	    }
+	    else {
+		if ( p.x < p_min.x ) p_min.x = p.x;
+		if ( p.y < p_min.y ) p_min.y = p.y;
+		if ( p.x > p_max.x ) p_max.x = p.x;
+		if ( p.y > p_max.y ) p_max.y = p.y;
+	    }
+	    
+	    os << "  " << '[' << p.x << ',' << p.y << "],\t// " << i->pst << endl;
+
+	    cp = p;
+	    ++j;
+	}
+	cp = p;
+	++i;
+    }
+    os << "];" << endl;
+    os << name << "_min" << " = [" << p_min.x << ',' << p_min.y << "];" << endl;
+    os << name << "_max" << " = [" << p_max.x << ',' << p_max.y << "];" << endl;
+    return os;
+}
+
+ostream&
+MyVisitor::print_scad( ostream& os ) const
+{
+    PathList_t::const_iterator i = pl.begin();
+    PathList_t::const_iterator end = pl.end();
+    while ( i != end ) {
+	os << "// " << *i << endl;
+	i->print_scad(os) << endl;
+	++i;
+    }
+    return os;
+}
+
+
+
+
 // -----------------------------------------------------------------------------
 
 int
@@ -776,6 +894,20 @@ main(int argc, const char** argv)
 	cout << "Argument missing." << endl;
 	exit(-1);
     }
+
+    string ifname( argv[1] );
+    string ofname;
+    
+    // Remove any initial path components
+    size_t i = ifname.rfind( '/' );
+    if ( i != string::npos ) {
+	ofname = ifname.substr(i+1);
+    }
+    else {
+	ofname = ifname;
+    }
+    ofname += ".scad";
+    
     
     if ( opt_d )
 	cout << "Loading:" << argv[1] << endl;
@@ -789,6 +921,15 @@ main(int argc, const char** argv)
 
     doc.Accept( &myvisitor );
 
+    ofstream ofs;
+    ofs.open( ofname );
+    if ( ofs.rdstate() & ofstream::failbit ) {
+	cerr << "Failed to open " << ofname << endl;
+	exit( EXIT_FAILURE );
+    }
+    
+    myvisitor.print_scad( ofs );
+    
     if ( opt_d ) {
 	cout << "======================================================"<< endl;
     }
