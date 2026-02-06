@@ -8,8 +8,8 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Sun Jan 18 13:32:59 2026
-// Update Count    : 251
+// Last Modified On: Thu Jan 22 22:30:55 2026
+// Update Count    : 324
 // 
 
 
@@ -20,6 +20,7 @@
 #include <string>
 #include <deque>
 #include <cstdlib>
+#include <cmath>
 
 #include<tinyxml2.h>
 
@@ -30,8 +31,8 @@ using namespace tinyxml2;
 // -----------------------------------------------------------------------------
 // Misc
 
-int opt_d = 1;				// Debug prints.
-int opt_v = 1;				// Verbose mode.
+int opt_d = 0;				// Debug prints.
+int opt_v = 0;				// Verbose mode.
 
 
 #if 1
@@ -213,7 +214,11 @@ SVGPathTokens::parse( const char* s )
 
 class SVGPoint {
 public:
+    enum NoValue {
+	invalid
+    };
     SVGPoint(double ax=0, double ay=0) : x(ax), y(ay) {};
+    SVGPoint(NoValue bad) : x(nan("")), y(nan("")) {};
     double x;
     double y;
 
@@ -224,6 +229,8 @@ public:
     static int parse(SVGPathTokenList_t::const_iterator i,
 		     SVGPathTokenList_t::const_iterator end,
 		     unsigned N, SVGPoint* p);
+
+    bool is_valid() const {return ((x!=nan(""))&&(y!=nan(""))); };
 
     SVGPoint& operator += (const SVGPoint& q) {
 	x += q.x;
@@ -251,7 +258,7 @@ ostream& operator<<( ostream& os, const SVGPointList_t& x) {
     }
     return os;
 }
-
+
 class SVGPathSection {
 public:
     char pst;				// Type of path section PST_XXX
@@ -504,6 +511,215 @@ SVGPath::parse(const SVGPathTokens& pt)
     
 }
 
+
+// -----------------------------------------------------------------------------
+// openscad
+
+
+class ScadPath {
+public:
+    string	name;
+    SVGPoint	iP;			// Initial point.
+    SVGPoint	cP;			// Current point.
+    SVGPoint	maxP;			// Max point
+    SVGPoint	minP;			// Min point
+    bool	is_closed;
+    SVGPointList_t pl;			// All points.
+
+    ScadPath() : name(), iP(), cP(), maxP(), minP(), is_closed(false), pl() {};
+
+    void clear();
+    void add(const SVGPath& svg_path);
+
+    void add_MovetoA(SVGPointList_t::const_iterator p,
+		     SVGPointList_t::const_iterator p_max);
+    void add_MovetoR(SVGPointList_t::const_iterator p,
+		     SVGPointList_t::const_iterator p_max);
+    void add_CubicA (SVGPointList_t::const_iterator p,
+		     SVGPointList_t::const_iterator p_max);
+    void add_CubicR (SVGPointList_t::const_iterator p,
+		     SVGPointList_t::const_iterator p_max);
+    
+    void set_mm(const SVGPoint& p);
+
+    ostream& cvs(ostream& os) const {
+	SVGPointList_t::const_iterator i_min = pl.begin();
+	SVGPointList_t::const_iterator i_max = pl.end();
+	SVGPointList_t::const_iterator i = i_min;
+	os << name << "_min = ["<< minP.x <<','<< minP.y <<"];" << endl;
+	os << name << "_max = ["<< maxP.x <<','<< maxP.y <<"];" << endl;
+	os << name << " = [" << endl;
+	if ( i_min != i_max ) {
+	    while ( i != i_max ) {
+		os<< "\t[" << i->x << ',' << i->y << "]," << endl;
+		++i;
+	    }
+	    if ( is_closed ) {
+		os<< "\t[" << i_min->x << ',' << i_min->y << "]" << endl;
+	    }
+	    else {
+		os << "\t// Not closed." << endl;
+	    }
+	    os << "];" << endl;
+	}
+	return os;
+    };
+    
+    struct Context {
+	SVGPoint iP;
+	SVGPoint minP;
+	SVGPoint maxP;
+	
+    };
+};
+
+ostream& operator<<(ostream& os, const ScadPath& x) {
+    return x.cvs(os);
+}
+
+
+void ScadPath::clear()
+{
+    name.clear();
+    iP   = SVGPoint(SVGPoint::invalid);
+    cP   = SVGPoint(SVGPoint::invalid);
+    minP = SVGPoint(SVGPoint::invalid);
+    maxP = SVGPoint(SVGPoint::invalid);
+    pl.clear();
+}
+
+
+void
+ScadPath::set_mm(const SVGPoint& p)
+{
+    if ( p.x > maxP.x ) maxP.x = p.x;    
+    if ( p.y > maxP.y ) maxP.y = p.y;    
+    if ( p.x < minP.x ) minP.x = p.x;    
+    if ( p.y < minP.y ) minP.y = p.y;    
+}
+
+
+void
+ScadPath::add_MovetoA(SVGPointList_t::const_iterator p,
+		      SVGPointList_t::const_iterator p_max)
+{
+    SVGPoint p0 = *p; ++p;
+    pl.push_back( p0 );
+
+    if ( !iP.is_valid() ) iP = p0;
+    cP = p0;
+    minP = p0;
+    maxP = p0;
+
+    while ( p != p_max ) {
+	p0 = *p; ++p;
+	pl.push_back( p0 );
+	set_mm(p0);
+    }
+    cP = p0;
+}
+
+void
+ScadPath::add_MovetoR(SVGPointList_t::const_iterator p,
+		      SVGPointList_t::const_iterator p_max)
+{
+    SVGPoint p0 = *p; ++p;
+    pl.push_back( p0 );
+
+    if ( !iP.is_valid() ) iP = p0;
+    cP = p0;
+    minP = p0;
+    maxP = p0;
+
+    while ( p != p_max ) {
+	p0 = *p; ++p;
+	p0 += cP;
+	pl.push_back( p0 );
+	set_mm(p0);
+    }
+    cP = p0;
+    
+}
+
+void
+ScadPath::add_CubicA(SVGPointList_t::const_iterator p,
+		      SVGPointList_t::const_iterator p_max)
+{
+    SVGPoint p0;
+    SVGPoint p1;
+    SVGPoint p2;
+    SVGPoint p3;
+	
+    
+    while ( p != p_max ) {
+	p0 = cP;
+	p1 = *p; ++p;	if ( p == p_max ) abort();
+	p2 = *p; ++p;	if ( p == p_max ) abort();
+	p3 = *p; ++p;
+
+	pl.push_back( p3 );
+	set_mm(p3);
+
+	cP = p3;
+    }
+}
+
+void
+ScadPath::add_CubicR(SVGPointList_t::const_iterator p,
+		     SVGPointList_t::const_iterator p_max)
+{
+    SVGPoint p0;
+    SVGPoint p1;
+    SVGPoint p2;
+    SVGPoint p3;
+	
+    
+    while ( p != p_max ) {
+	// add cP???
+	p0 = cP;
+	p1 = *p; ++p;	if ( p == p_max ) abort();
+	p2 = *p; ++p;	if ( p == p_max ) abort();
+	p3 = *p; ++p;
+
+	pl.push_back( p3 );
+	set_mm(p3);
+
+	cP = p3;
+    }
+}
+
+
+void
+ScadPath::add(const SVGPath& svg_path)
+{
+    if ( name.empty() )
+	name = svg_path.name;
+    SVGPathSectionList_t::const_iterator i     = svg_path.psl.begin();
+    SVGPathSectionList_t::const_iterator i_max = svg_path.psl.end();
+    while ( i != i_max ) {
+	SVGPointList_t::const_iterator p     = i->pl.begin();
+	SVGPointList_t::const_iterator p_max = i->pl.end();
+	if ( p != p_max ) {
+	    switch( i->pst ) {
+	    case PST_NONE:	/* IGNORE */			break;
+	    case PST_Moveto:	add_MovetoA( p, p_max );	break;
+	    case PST_MovetoR:	add_MovetoR( p, p_max );	break;
+	    case PST_Cubic:	add_CubicA( p, p_max ); 	break;
+	    case PST_CubicR:	add_CubicR( p, p_max ); 	break;
+	    case PST_Closepath: abort(); // cannot happen as p == p_max!
+	    default:
+		cout << "Unrecognised path type: " << i->pst <<  endl;
+		abort();
+	    }
+	}
+	else if ( i->pst == PST_Closepath ) {
+	    is_closed = true;
+	}
+	++i;
+    }
+}
+
+
 
 
 // -----------------------------------------------------------------------------
@@ -511,14 +727,14 @@ SVGPath::parse(const SVGPathTokens& pt)
 
 
 typedef deque<string>  NSStack_t;	// Stack of all namespaces.
-typedef deque<SVGPath> PathList_t;	// List of all SVGPatchs.
+typedef deque<ScadPath> PathList_t;
 
 class MyVisitor : public XMLVisitor {
  public:
     unsigned	lvl;			// Hierarchical level of elements
     NSStack_t	nss;			// Napespace Stack.
-    PathList_t  pl;			// List of all SVGPaths.
-    
+    PathList_t	pl;
+    //    ScadPath	scad_path;
     // List of paths here.
 
     // - - - - - - - - - - - - - - - 
@@ -546,7 +762,7 @@ class MyVisitor : public XMLVisitor {
 
 
 MyVisitor::MyVisitor()
-: XMLVisitor(), lvl(0), nss()
+    : XMLVisitor(), lvl(0), nss(), pl()
 {
     // EMPTY
 };
@@ -561,6 +777,8 @@ MyVisitor::VisitEnter(const XMLDocument& x)
     nss.push_front( string("") );
     lvl =0;
 
+    pl.clear();
+    
     if ( opt_d ) {
 	DOUT << "------------------------------------------------------" << endl
 	     << "BEGIN Document (" << lvl << ")" << endl;
@@ -706,10 +924,12 @@ bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 	if ( id && d_str ) {
 	    SVGPathTokens pt;
 	    pt.parse( d_str );
-	    if ( opt_d )
-		cout << "d=" << '"' << d_str << '"' << endl
-		     << "path tokens = " << pt << endl;
-
+	    if ( opt_d ) {
+		PP(lvl);
+		cout << "d=" << '"' << d_str << '"' << endl;
+		PP(lvl);
+		cout << "path tokens = " << pt << endl;
+	    }
 	    SVGPath p;
 	    p.name = nss.front();
 	    while ( !p.name.empty() && p.name[0] == '_' )
@@ -718,20 +938,20 @@ bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 	    p.name += id;
 	    p.parse( pt );
 
-	    if ( !p.psl.empty() )
-		pl.push_front( p );
-		
-	    if ( opt_d )
-		cout << "path = " << p << endl;
-
-	    if ( opt_v ) {
+	    if ( opt_d ) {
 		PP(lvl);
-		cout << "path " << id << " : " << pl.front().name
-		     << " length=" << pl.front().psl.size() << endl;
+		cout << "path = " << p << endl;
 	    }
-	
+	    
+	    ScadPath scad_path;
+	    if ( !p.psl.empty() ) {
+		scad_path.add( p );
+		pl.push_back( scad_path );
+	    }
+
+	    cout << scad_path << endl;
 	}
-	print_path(x,a);
+	//print_path(x,a);
     }
     
     else if ( !strcmp(name,"svg") ||
@@ -744,13 +964,11 @@ bool MyVisitor::VisitEnter(const XMLElement& x, const XMLAttribute* a)
 	// IGNORE
     }
     else {
-	if ( opt_v ) {
-	    cout << "Unrecognised element: " << endl;
-	    while (a) {
-		PP(lvl);
-		cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
-		a = a->Next();
-	    }
+	cout << "Unrecognised element: " << endl;
+	while (a) {
+	    PP(lvl);
+	    cout << a->Name() << "=" << '"' << a->Value() << '"' << endl;
+	    a = a->Next();
 	}
     }
     return true;
@@ -804,74 +1022,15 @@ bool MyVisitor::Visit(const XMLUnknown& x)
 // -----------------------------------------------------------------------------
 // scad output
 
-ostream&
-SVGPath::print_scad( ostream& os ) const
-{
-    SVGPoint	cp;			// Current point.
-    SVGPoint	ip;			// Initial Point
-    SVGPoint    p;
-    SVGPoint	p_min;
-    SVGPoint	p_max;
-    
-    bool	has_ip = false;
-
-    
-    SVGPathSectionList_t::const_iterator i = psl.begin();
-    SVGPathSectionList_t::const_iterator imax = psl.end();
-    os << name << " =  [" << endl;
-    while( i != imax ) {
-	SVGPointList_t::const_iterator j =i->pl.begin();
-	SVGPointList_t::const_iterator jmax =i->pl.end();
-	while ( j != jmax ) {
-	    p = *j;
-	    if ( i->pst == PST_NONE ) {
-		os << "  // '?'" << endl;
-	    }
-	    else if ( i-> pst == PST_Moveto ) {
-
-	    }
-	    else if ( i-> pst == PST_MovetoR ) {
-		p += cp;
-	    }
-	    else {
-		os << "  // " << i->pst << " NOT handled" << endl;		
-	    }
-	    
-	    if ( !has_ip ) {
-		has_ip = true;
-		ip = p;
-		p_min = p;
-		p_max = p;
-	    }
-	    else {
-		if ( p.x < p_min.x ) p_min.x = p.x;
-		if ( p.y < p_min.y ) p_min.y = p.y;
-		if ( p.x > p_max.x ) p_max.x = p.x;
-		if ( p.y > p_max.y ) p_max.y = p.y;
-	    }
-	    
-	    os << "  " << '[' << p.x << ',' << p.y << "],\t// " << i->pst << endl;
-
-	    cp = p;
-	    ++j;
-	}
-	cp = p;
-	++i;
-    }
-    os << "];" << endl;
-    os << name << "_min" << " = [" << p_min.x << ',' << p_min.y << "];" << endl;
-    os << name << "_max" << " = [" << p_max.x << ',' << p_max.y << "];" << endl;
-    return os;
-}
 
 ostream&
 MyVisitor::print_scad( ostream& os ) const
 {
-    PathList_t::const_iterator i = pl.begin();
-    PathList_t::const_iterator end = pl.end();
-    while ( i != end ) {
-	os << "// " << *i << endl;
-	i->print_scad(os) << endl;
+    PathList_t::const_iterator i_min = pl.begin();
+    PathList_t::const_iterator i_max = pl.end();
+    PathList_t::const_iterator i = i_min;
+    while ( i != i_max ) {
+	os << *i << endl;
 	++i;
     }
     return os;
@@ -882,20 +1041,63 @@ MyVisitor::print_scad( ostream& os ) const
 
 // -----------------------------------------------------------------------------
 
+// TODO: Proper argument handling.
+
+string argv0;
+
+void
+do_help()
+{
+    cout << argv0 << "[-h][-d][-v] <input>" << endl
+	 << "\t-h	Print help. (This message)." << endl
+	 << "\t-d	Turn on debug prints." << endl
+	 << "\t-v	Turn on verbose mode." << endl;
+}
+
 int
 main(int argc, const char** argv)
 {
     XMLDocument doc;
     XMLError err;
     MyVisitor myvisitor;
-    XMLPrinter printer( stdout);
-    
-    if ( argc != 2 ) {
-	cout << "Argument missing." << endl;
-	exit(-1);
+
+    argv0 = *argv;
+    ++argv;
+    --argc;
+
+    while ( argc ) {
+	int n = 0;
+	string arg( *argv );
+
+	if ( !arg.compare("-h") ) {
+	    do_help();
+	    n = 1;
+	    exit( EXIT_SUCCESS );
+	}
+	if ( !arg.compare("-d") ) {
+	    opt_d = 1;
+	    opt_v = 1;
+	    n = 1;
+	}
+	if ( !arg.compare("-v") ) {
+	    opt_v = 1;
+	    n = 1;
+	}
+
+	
+	if ( !n )
+	    break;
+	argv += n;
+	argc -= n;
+    };
+
+    if ( !argc ) {
+	cout << "Input file missing." << endl;
+	do_help();
+	exit(EXIT_FAILURE);
     }
 
-    string ifname( argv[1] );
+    string ifname( *argv );
     string ofname;
     
     // Remove any initial path components
@@ -910,9 +1112,9 @@ main(int argc, const char** argv)
     
     
     if ( opt_d )
-	cout << "Loading:" << argv[1] << endl;
+	cout << "Loading:" << ifname << endl;
 
-    err = doc.LoadFile( argv[1] );
+    err = doc.LoadFile( ifname.c_str() );
 
     if ( opt_d ) {
 	cout<< "err = " << err << endl;
