@@ -7,7 +7,7 @@
    viewBox="0 0 210 297"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.2 (2aeb623e1d, 2025-05-12)"
+   inkscape:version="1.4.3 (fcd0343856, 2026-01-01)"
    sodipodi:docname="P1.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.35767747"
-     inkscape:cx="-437.54503"
-     inkscape:cy="401.19944"
+     inkscape:zoom="2.0233293"
+     inkscape:cx="566.64033"
+     inkscape:cy="146.54065"
      inkscape:window-width="1878"
      inkscape:window-height="1011"
      inkscape:window-x="0"
@@ -38,25 +38,31 @@
      inkscape:label="L1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
-       style="fill:none;stroke:#0000ff;stroke-width:1;-inkscape-stroke:none"
-       d="M 55.109588,82.47945 93.945203,63.246573 139.06849,109.10959 94.684931,132.41096 82.109587,95.424656 Z"
-       id="path1"
-       inkscape:label="PATH1" />
     <g
        id="g1"
        inkscape:label="G1">
       <path
          style="fill:none;stroke:#0000ff;stroke-width:1;-inkscape-stroke:none"
-         d="m 74.96009,182.03119 38.83561,-19.23288 45.12329,45.86302 -44.38356,23.30137 -12.57534,-36.98631 z"
+         d="m 74.96,182.03 38.84,-19.23 45.12,45.86 -44.38,23.3 -12.58,-36.99 z"
          id="path1-8"
-         inkscape:label="PATH2" />
+         inkscape:label="P2"
+         sodipodi:nodetypes="cccccc" />
+    </g>
+    <g
+       inkscape:groupmode="layer"
+       id="layer2"
+       inkscape:label="G1Layer">
+      <path
+         style="fill:none;stroke:#0000ff;stroke-width:1;-inkscape-stroke:none"
+         d="M 55.109588,82.47945 93.945203,63.246573 139.06849,109.10959 94.684931,132.41096 82.109587,95.424656 Z"
+         id="path1"
+         inkscape:label="PATH1" />
     </g>
     <path
        style="fill:none;stroke:#0000ff;stroke-width:1;-inkscape-stroke:none"
-       d="m 130.93151,34.767123 c 0,0 35.272,-14.512384 45.12328,-6.287672 15.91842,13.290096 10.17776,40.005149 -0.36986,31.438357 -14.44852,-11.735108 -38.09589,2.720036 -38.09589,2.720036 z"
+       d="m 130.93,34.77 c 71.03236,-26.1753535 60.26401,4.104883 44.75,25.15 -21.36118,-8.492833 -38.1,2.72 -38.1,2.72 -2.21667,-9.29 -4.43333,-18.58 -6.65,-27.87 z"
        id="path2"
-       sodipodi:nodetypes="csscc"
+       sodipodi:nodetypes="cccc"
        inkscape:label="pathwspline" />
   </g>
 </svg>
