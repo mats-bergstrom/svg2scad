@@ -1,4 +1,4 @@
-# Create a files suited for openscad from an inkscape SVG file.
+# Create files suited for openscad from an inkscape SVG file.
 
 ## Background
 I do 3D modeling using OpenScad and polygons is a very efficient way to do fairly complex designs.  Inkscape provides a very easy way to create and edit polygons.  Therefore I needed a way to to read in an SVG file creted using inkscape and emit a scad file.
