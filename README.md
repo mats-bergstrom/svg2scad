@@ -23,6 +23,8 @@ $ svg2scad [options] input.svg
 | -d | Enable debug prints. |
 | -dL <double> | Set delta length (in mm) used in splines.  Default is 2.0. |
 
+Only polygons with a label (set in "Object Properties" e.g. with the "inkscape:label" attribute) are translated to scad XY paths.
+The string value label of the polygon is used in the name of the scad XY path variable.
 
 # Internals
 ## Overview
