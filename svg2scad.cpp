@@ -8,8 +8,8 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Thu Mar  5 20:46:47 2026
-// Update Count    : 534
+// Last Modified On: Tue Mar 10 18:41:18 2026
+// Update Count    : 546
 // 
 
 
@@ -231,6 +231,7 @@ namespace s2s {
 			 SVGPathTLIter_t end,
 			 unsigned N, XYPoint* p);
 
+
 	XYPoint& operator += (const XYPoint& q) {
 	    x += q.x;
 	    y += q.y;
@@ -260,6 +261,9 @@ namespace s2s {
 	return x.cvs(os);
     }
 
+    bool operator== (const XYPoint& a, const XYPoint& b) {
+	return ((a.x == b.x) && (a.y==b.y));
+    }
 
     
     ostream& operator<<( ostream& os, const XYPointList_t& x) {
@@ -312,7 +316,9 @@ namespace s2s {
 		  SVGPathTLIter_t end);
 
 	// Append other segments to this and convert to XY Segments.
-	int append(const XYSegment& seg); 
+	int append(const XYSegment& seg);
+
+	void remove_duplicates();
 
 	ostream& cvs( ostream& os ) const {
 	    return os << type << pl;
@@ -369,6 +375,29 @@ namespace s2s {
 
 }
 
+
+void
+s2s::XYSegment::remove_duplicates()
+{
+    if ( type == s2D_ST_XYPath ) {
+	XYPointListIter_t i =   pl.begin();
+	XYPointListIter_t i_end = pl.end();
+	XYPointListIter_t p = i;
+	if ( i != i_end ) {
+	    ++i;
+	}
+	while ( i != i_end ) {
+	    if ( *i == *p )
+		pl.erase(p);
+	    p = i;
+	    ++i;
+	};
+	    
+    }
+    else {
+	// Ignore for now.
+    }
+}
 
 
 class s2D {
@@ -879,6 +908,7 @@ s2s::XYPath::set( const char* s )
 	    break;
 	++s_i;
     }
+    seg.remove_duplicates();
 
     calc_bb();
     
