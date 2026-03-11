@@ -8,8 +8,8 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Tue Mar 10 18:41:18 2026
-// Update Count    : 546
+// Last Modified On: Wed Mar 11 17:37:43 2026
+// Update Count    : 556
 // 
 
 
@@ -318,6 +318,9 @@ namespace s2s {
 	// Append other segments to this and convert to XY Segments.
 	int append(const XYSegment& seg);
 
+	// Append a point. Avoid Duplicates.
+	void append(const XYPoint& p);
+	
 	void remove_duplicates();
 
 	ostream& cvs( ostream& os ) const {
@@ -374,6 +377,26 @@ namespace s2s {
 
 
 }
+
+
+
+void
+s2s::XYSegment::append(const XYPoint& p)
+{
+    if ( !pl.empty() ) {
+	if ( pl.back() == p ) {
+	    if ( opt_d ) {
+		cout << "pl.back() == p : " << pl.back() << "==" << p << endl;
+	    }
+	    return;
+	}
+	else if ( opt_d ) {
+		cout << "pl.back() != p : " << pl.back() << "!=" << p << endl;
+	}
+    }
+    pl.push_back( p );
+}
+
 
 
 void
@@ -500,7 +523,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	    // If there is no other path segment just add initial point.
 	    // Both M and m uses absolute coordinates in this case.
 	    cP = *i;
-	    pl.push_back( cP );
+	    append( cP ); // pl.push_back( cP );
 	    ++i;
 	    // Then catch the rest of the points (if any) below.
 	}
@@ -515,7 +538,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 		cP += *i;
 	    }
 	    // This is not handled corretly...
-	    pl.push_back( cP );
+	    append( cP ); //pl.push_back( cP );
 	    ++i;
 	}
     }
@@ -529,7 +552,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 
     case s2D_ST_XYPath:			// Just append as is.
 	while ( i != end ) {
-	    pl.push_back( *i );
+	    append( *i ); //pl.push_back( *i );
 	    ++i;
 	}
 	break;
@@ -537,7 +560,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
     case s2D_ST_L:			// Lineto ABS
     case s2D_ST_M:			// Moveto ABS, As Lineto!
 	while ( i != end ) {
-	    pl.push_back( *i );
+	    append( *i ); //pl.push_back( *i );
 	    ++i;
 	}
 	break;
@@ -547,7 +570,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	while ( i != end ) {
 	    XYPoint p = *i;
 	    p += cP;
-	    pl.push_back( p );
+	    append( p ); //pl.push_back( p );
 	    ++i;
 	    cP = p;
 	}
@@ -558,7 +581,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	    cout << "Warning.  Z/z with points should not happend!" << endl;
 	}
 	if ( !pl.empty() ) {
-	    pl.push_back( pl.front() );
+	    append( pl.front() ); //pl.push_back( pl.front() );
 	}
 	else {
 	    cout << "Warning: Closepath of empty path!" << endl;
@@ -569,7 +592,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	while ( i != end ) {
 	    XYPoint p = cP;
 	    p.x = i->x;
-	    pl.push_back( p );
+	    append( p ); //pl.push_back( p );
 	    ++i;
 	}
 	break;
@@ -578,7 +601,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	while ( i != end ) {
 	    XYPoint p = cP;
 	    p.x += i->x;
-	    pl.push_back( p );
+	    append( p ); //pl.push_back( p );
 	    ++i;
 	    cP = p;
 	}
@@ -588,7 +611,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	while ( i != end ) {
 	    XYPoint p = cP;
 	    p.y = i->y;
-	    pl.push_back( p );
+	    append( p ); //pl.push_back( p );
 	    ++i;
 	}
 	break;
@@ -597,7 +620,7 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 	while ( i != end ) {
 	    XYPoint p = cP;
 	    p.y += i->y;
-	    pl.push_back( p );
+	    append( p ); //pl.push_back( p );
 	    ++i;
 	    cP = p;
 	}
@@ -628,8 +651,9 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 		XYPoint p;
 		p.x = P0.x * s*s2 + 3*P1.x * t*s2 + 3*P2.x * t2*s + P3.x * t2*t;
 		p.y = P0.y * s*s2 + 3*P1.y * t*s2 + 3*P2.y * t2*s + P3.y * t2*t;
-		pl.push_back( p );
+		append( p ); //pl.push_back( p );
 	    }
+	    append( P3 ); //pl.push_back( P3 );
 	    
 	    cP = P3;
 	}
@@ -666,9 +690,9 @@ s2s::XYSegment::append( const s2s::XYSegment& seg)
 		p.x = P0.x * s*s2 + 3*P1.x * t*s2 + 3*P2.x * t2*s + P3.x * t2*t;
 		p.y = P0.y * s*s2 + 3*P1.y * t*s2 + 3*P2.y * t2*s + P3.y * t2*t;
 
-		pl.push_back( p );
+		append( p ); //pl.push_back( p );
 	    }
-	    pl.push_back( P3 );
+	    append( P3 ); //pl.push_back( P3 );
 	    cP = P3;
 	}
 	break;
@@ -908,7 +932,6 @@ s2s::XYPath::set( const char* s )
 	    break;
 	++s_i;
     }
-    seg.remove_duplicates();
 
     calc_bb();
     
