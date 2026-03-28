@@ -11,7 +11,9 @@ I do 3D modeling using OpenScad and polygons is a very efficient way to do fairl
 | v0.21   | Removed duplicate points in splines. |
 |         |  |
 | v0.3    | Use text elements for code. |
-| | Use Text elements for settings. "
+| | Use Text elements for settings. |
+| | |
+| TBD | |
 | | Remove duplicate enties in paths. |
 | | Add arcs in paths. |
 | | Use text elements for in-line code and directives. |
@@ -100,6 +102,7 @@ Settings:
 | origin | svg | Keep svg origin and coordinate system un change into the output file. |
 | origin | scad | Replace y-values: y_scad = page_height - y_svg. "
 
+The `origin` setting is needed as SVG uses the upper-left corner of a page as origin with y-values increasing downwards and scad has y-values increasing "upwards" (when viewing from the positive z-axis).  Using `origin:scad` replaces all y-values in paths to `page_height - original_y`.
 
 # Internals
 ## Overview
