@@ -8,8 +8,11 @@ I do 3D modeling using OpenScad and polygons is a very efficient way to do fairl
 | ------- | ----- |
 | v0.1    | Initial version.  Linear paths are functional, splines are not. |
 | v0.2    | Cubic splines are functional.  Quadratic splines are not implemented. |
+| v0.21   | Removed duplicate points in splines. |
 |         |  |
-| TBD     | Remove duplicate enties in paths. |
+| v0.3    | Use text elements for code. |
+| | Use Text elements for settings. "
+| | Remove duplicate enties in paths. |
 | | Add arcs in paths. |
 | | Use text elements for in-line code and directives. |
 
@@ -22,9 +25,78 @@ $ svg2scad [options] input.svg
 | -v | Verbose mode. |
 | -d | Enable debug prints. |
 | -dL <double> | Set delta length (in mm) used in splines.  Default is 2.0. |
+| -V2 | Use v0.2x behaviour. |
 
-Only polygons with a label (set in "Object Properties" e.g. with the "inkscape:label" attribute) are translated to scad XY paths.
-The string value label of the polygon is used in the name of the scad XY path variable.
+The output file is named as the input file with ".scad" added.  E.g. The input file "my.svg" will have "my.svg.scad" as output file.
+
+
+# SVG Elements
+
+## Polygons
+Only named polygons (i.e. with svg attribute inkscape:label set) are used.
+The name/label can be set in inskcapes dialogue "Object Properties" or in the dialogue "Layers and Objects" with setting "Only SHow Layers" set to OFF.
+
+Each named polygon will result in 3 variables in the output file
+* An array containing the points of the path.
+* A point corresponding to the maximum point in the path.
+* A point corresponding to the minimum point in the path.
+The names of the variables are: `s2s_label_path`,
+`s2s_label_min` and `s2s_label_max`, respectively
+
+I.e. an SVG path labelled P1 will result in:
+
+```
+s2s_P1_path = [ . . . ];
+s2s_P1_min = [ xmin, ymin ];
+s2s_P1_max = [ xmax, ymax ];
+
+```
+
+## Text Elements
+Text witin SVG Text Elements (and contained tspan elements)
+are concatenated into a list of strings, one per XML Text Element.
+If the first line in an SVG Text Element equals "$code" it is a Code Text Element.
+If the first line in an SVG Text Element equals "$settings" it is a Settings Text Element.
+
+### Code Text Elements
+
+Code Text Elements are emitted to the output file after some
+substitutions are made:
+
+1. The initial line "$code" is removed.
+2. Meta Variables are replaced with their values.
+
+### Settings Text Elements
+
+Settings Text Elements are processed according to the settings.
+
+# Meta Variables
+Meta variables follow the pattern:
+```
+$ name ( arg )
+```
+
+| Name | Argument | Value |
+| path | path-name | Name of the variable holding the path point array. |
+| min | path-name | Name of the variable holding the path minimum point. |
+| max | path-name | Name of the variable holding the path maximum point. |
+
+Example:
+```
+$path(P1) --> s2s_P1_path
+```
+
+# Settings
+Settings are simple tag-values using the pattern:
+```
+tag : val [; tag : val]+ [// Comment]
+```
+
+Settings:
+| Tag | Value | Effect |
+| origin | svg | Keep svg origin and coordinate system un change into the output file. |
+| origin | scad | Replace y-values: y_scad = page_height - y_svg. "
+
 
 # Internals
 ## Overview
@@ -32,16 +104,9 @@ TinyXML is used to parse the SVG file.
 * https://github.com/leethomason/tinyxml2
 * On ubuntu: sudo apt install tinyxml2-dev
 
-The class SVGVisitor inherits the tinyxml2::XMLVisitor and overloads the virtual functions for entering and exiting XML entities.
+After reading the svg document, an "S2S" (SVG2Scad) object is created using
+a factory function.
+The S2S object then visits the document using the tinyxml::XMLVisitor
+and builds up lists of the paths and other relevant elements.
 
-The class SVGPathToken holds a path token (from the d attribute).
-The class SVGPathTokens holds a list of tokens (full contents of the d attribute).
-
-The namespace 2s2 contains most definitions related to scad generation.
-
-The class s2s::s2D handles the “2D” functionality; namsepace and paths.
-
-Unparsing generates several openscad "variables" for each path
-* An XY path list.
-* An XY point corresponding the minimum x and y values.
-* An XY point corresponding the maximum x and y values.
+The S2S object then compiles the information and, unparses to the output file.

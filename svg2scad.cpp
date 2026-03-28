@@ -8,8 +8,8 @@
 // Created On      : Sun Jan 11 21:02:01 2026
 // 
 // Last Modified By: Mats
-// Last Modified On: Wed Mar 11 18:09:16 2026
-// Update Count    : 561
+// Last Modified On: Thu Mar 26 19:07:30 2026
+// Update Count    : 580
 // 
 
 
@@ -20,8 +20,11 @@ int opt_d = 0;				// Debug prints.
 int opt_v = 0;				// Verbose mode.
 int opt_fixme = 0;			// Print FIXMEs.
 
+int opt_V2 = 0;				// Use v0.2 behaviour
 
-#include "s2s.hpp"
+
+#include "s2d.hpp"
+#include "s2t.hpp"
 
 
 
@@ -37,11 +40,12 @@ string argv0;
 void
 do_help()
 {
-    cout << argv0 << "[-h][-d][-v] <input>" << endl
+    cout << argv0 << "[-h][-d][-v][-t] <input>" << endl
 	 << "\t-h		Print help. (This message)." << endl
 	 << "\t-d		Turn on debug prints." << endl
 	 << "\t-v		Turn on verbose mode." << endl
-	 << "\t-dL <val>	Step in curves, default = 1.0" << endl;
+	 << "\t-dL <val>	Step in curves, default = 1.0" << endl
+	 << "\t-V2		Version 0.2x behaviour" << endl;
 }
 
 int
@@ -49,7 +53,6 @@ main(int argc, const char** argv)
 {
     XMLDocument doc;
     XMLError err;
-    MyVisitor myvisitor;
 
     argv0 = *argv;
     ++argv;
@@ -64,16 +67,24 @@ main(int argc, const char** argv)
 	    n = 1;
 	    exit( EXIT_SUCCESS );
 	}
+	else
 	if ( !arg.compare("-d") ) {
 	    opt_d = 1;
 	    opt_v = 1;
 	    n = 1;
 	}
+	else
 	if ( !arg.compare("-v") ) {
 	    opt_v = 1;
 	    n = 1;
 	}
+	else
+	if ( !arg.compare("-V2") ) {
+	    opt_V2 = 1;
+	    n = 1;
+	}
 
+	else
 	if ( !arg.compare("-dL") ) {
 	    if ( argc < 2 ) {
 		cout << "Error: Argument for option -dL missing!" << endl;
@@ -88,6 +99,13 @@ main(int argc, const char** argv)
 		exit( EXIT_FAILURE );
 	    }
 	    n = 2;
+	}
+
+	else
+	if ( **argv == '-' ) {
+	    cout << "Invalid option: " << *argv << endl;
+	    do_help();
+	    exit( EXIT_FAILURE );
 	}
 	
 	if ( !n )
@@ -123,10 +141,29 @@ main(int argc, const char** argv)
 
     if ( opt_d ) {
 	cout<< "err = " << err << endl;
-	cout << "doc==================================================="<< endl;
     }
 
-    doc.Accept( &myvisitor );
+    S2S* the_s2s = 0;
+    int rv;
+
+    if (opt_d )
+	cout << "doc==================================================="
+	     << endl;
+
+    if ( opt_V2 ) {	
+	the_s2s = S2D_Create();
+    }
+    else {
+	the_s2s = S2T_Create();
+    }
+
+    rv = the_s2s->visit(doc);
+
+    if ( opt_d )
+	cout << "======================================================"
+	     << endl;
+
+    rv = the_s2s->compile();
 
     ofstream ofs;
     ofs.open( ofname );
@@ -134,13 +171,12 @@ main(int argc, const char** argv)
 	cerr << "Failed to open " << ofname << endl;
 	exit( EXIT_FAILURE );
     }
-    
-    
-    if ( opt_d ) {
-	cout << "======================================================"<< endl;
-    }
-    
-    myvisitor.unparse_scad( ofs );
+
+    rv = the_s2s->unparse( ofs );
+    ofs.close();
+
+    delete the_s2s;
+
 
     return 0;
 }
