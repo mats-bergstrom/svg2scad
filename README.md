@@ -77,6 +77,7 @@ $ name ( arg )
 ```
 
 | Name | Argument | Value |
+| --- | --- | --- |
 | path | path-name | Name of the variable holding the path point array. |
 | min | path-name | Name of the variable holding the path minimum point. |
 | max | path-name | Name of the variable holding the path maximum point. |
@@ -93,7 +94,9 @@ tag : val [; tag : val]+ [// Comment]
 ```
 
 Settings:
+
 | Tag | Value | Effect |
+| --- | --- | --- |
 | origin | svg | Keep svg origin and coordinate system un change into the output file. |
 | origin | scad | Replace y-values: y_scad = page_height - y_svg. "
 
