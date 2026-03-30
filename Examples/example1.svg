@@ -9,11 +9,12 @@
    id="svg1"
    inkscape:version="1.4.3 (fcd0343856, 2026-01-01)"
    sodipodi:docname="example1.svg"
+   xml:space="preserve"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
      bordercolor="#000000"
@@ -29,8 +30,7 @@
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1">
-    <inkscape:grid
+     inkscape:current-layer="layer1"><inkscape:grid
        id="grid1"
        units="mm"
        originx="0"
@@ -43,11 +43,8 @@
        opacity="0.14901961"
        empspacing="5"
        enabled="true"
-       visible="true" />
-  </sodipodi:namedview>
-  <defs
-     id="defs1">
-    <marker
+       visible="true" /></sodipodi:namedview><defs
+     id="defs1"><marker
        style="overflow:visible"
        id="ConcaveTriangle"
        refX="7"
@@ -59,14 +56,11 @@
        viewBox="0 0 1 1"
        inkscape:isstock="true"
        inkscape:collect="always"
-       preserveAspectRatio="xMidYMid">
-      <path
+       preserveAspectRatio="xMidYMid"><path
          transform="scale(0.7)"
          d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
          style="fill:context-stroke;fill-rule:evenodd;stroke:none"
-         id="path9" />
-    </marker>
-    <marker
+         id="path9" /></marker><marker
        style="overflow:visible"
        id="Triangle"
        refX="5"
@@ -78,19 +72,30 @@
        viewBox="0 0 1 1"
        inkscape:isstock="true"
        inkscape:collect="always"
-       preserveAspectRatio="xMidYMid">
-      <path
+       preserveAspectRatio="xMidYMid"><path
          transform="scale(0.5)"
          style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
          d="M 5.77,0 -2.88,5 V -5 Z"
-         id="path135" />
-    </marker>
-  </defs>
-  <g
+         id="path135" /></marker><marker
+       style="overflow:visible"
+       id="ConcaveTriangle-0"
+       refX="7"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Concave triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid"><path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path9-9" /></marker></defs><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
-    <text
+     id="layer1"><text
        xml:space="preserve"
        style="font-size:4.23333px;writing-mode:lr-tb;direction:ltr;fill:#000000;stroke:none;stroke-width:1;-inkscape-stroke:none"
        x="5.0437412"
@@ -120,130 +125,126 @@
          style="fill:#000000;stroke-width:1"
          x="5.0437412"
          y="26.072479"
-         id="tspan12" /></text>
-    <path
+         id="tspan12" /></text><path
        style="fill:none;stroke:#000000;stroke-width:0.25"
        d="M 10,74.999997 160,29.999998 H 10 Z"
        id="path1"
-       inkscape:label="P_frame" />
-    <path
+       inkscape:label="P_frame" /><path
        style="fill:none;stroke:#ff0000;stroke-width:0.25"
        d="m 10,74.999997 25.000001,-44.999999 25,30 20.000001,-29.999999 15,19.470833 L 110.21918,29.999998 127,39.999999"
        id="path2"
        sodipodi:nodetypes="ccccccc"
-       inkscape:label="P_z" />
-    <text
+       inkscape:label="P_z" /><text
        xml:space="preserve"
        style="font-size:4.23333px;fill:#000000;stroke-width:1;-inkscape-stroke:none"
-       x="130"
+       x="135"
        y="65"
        id="text2"><tspan
          sodipodi:role="line"
          id="tspan2"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="65">$code</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="70.291664"
          id="tspan3">T = 3;</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="75.583328"
          id="tspan18" /><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="80.874985"
          id="tspan20">module polyhull( P ) {</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="86.166649"
          id="tspan22">  N = len(P);</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="91.458313"
          id="tspan23">  for ( i = [1:N-1] )</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="96.749969"
          id="tspan25">    hull() {</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="102.04163"
          id="tspan26">      translate( P[i-1] ) children(0);</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="107.3333"
          id="tspan24">      translate( P[i-0] ) children(0);</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="112.62496"
          id="tspan27">    }</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="117.91663"
          id="tspan21">};</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="123.20828"
          id="tspan19" /><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="128.49994"
          id="tspan4">linear_extrude(T) {</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="133.79161"
          id="tspan11">polyhull( $path(P_frame) ) {</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="139.08327"
          id="tspan15">  circle(r=3,$fn=20);</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="144.37494"
          id="tspan13">}</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="149.6666"
          id="tspan29">polyhull( $path(P_z) ) {</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="154.95825"
          id="tspan30">  circle(r=2,$fn=20);</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="160.24992"
          id="tspan31">}</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="165.54158"
          id="tspan28">}</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:1"
-         x="130"
+         x="135"
          y="170.83325"
-         id="tspan5" /></text>
-    <text
+         id="tspan5" /></text><text
        xml:space="preserve"
        style="font-size:4.23333px;fill:#000000;stroke-width:1;-inkscape-stroke:none"
        x="130"
@@ -253,8 +254,7 @@
          id="tspan6"
          style="stroke-width:1"
          x="130"
-         y="15">P_frame</tspan></text>
-    <text
+         y="15">P_frame</tspan></text><text
        xml:space="preserve"
        style="font-size:4.23333px;fill:#ff0000;stroke-width:1;-inkscape-stroke:none"
        x="155"
@@ -264,14 +264,31 @@
          id="tspan7"
          style="stroke-width:1;fill:#ff0000"
          x="155"
-         y="19.999998">P_z</tspan></text>
-    <path
+         y="19.999998">P_z</tspan></text><path
        style="fill:none;stroke:#000000;stroke-width:0.25;marker-end:url(#ConcaveTriangle)"
        d="m 130,14.999999 -5.72603,14.999999"
-       id="path7" />
-    <path
+       id="path7" /><path
        style="fill:none;stroke:#ff0000;stroke-width:0.25;marker-end:url(#Triangle)"
        d="M 155,19.999999 122.08058,37.068426"
-       id="path8" />
-  </g>
-</svg>
+       id="path8" /><image
+       width="138.37709"
+       height="43.65625"
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgsAAAClCAYAAADS1r55AAAABHNCSVQICAgIfAhkiAAADzBJREFU&#10;eJzt3U2IX1cZx/FnhohFLSiIIEEUCRGRgi7UaqtSpCQrQV21C4mrEoQi7kTTRVWKC20XLaGbFqq0&#10;GxF000gIodAXqKJgwYUMXQhR+qZSsyhSMy6mN/f8b+499+059zzPOd/Pqs3LzDQzmf+3v/u2d3h4&#10;5VCwmb2943J4eCX3hwEAwGT7uT8AAABgG7GwIVYFAIBHxMJGCAUAgFfEAgAAiCIWNsCqAADwjFgA&#10;AABRxEJirAoAAO+IBQAAEEUsJMSqAAAoAbGQCKEAACgFsQAAAKKIBTlaAfb2jqu+PVYFAEApjuX+&#10;ACxoXti7wcALPgAAxMKObhyE8TA1HFgVAAClIRYiwhd9VgcAQK2IhYmmrA6sCgCAEhELC8VWBwAA&#10;SsLVEAqacGBVAACUiGVBQYrDD9cOTo/+mv0TF1TfJwAAffYOD68c5v4gvNOMhSmRMIR4AACkQCys&#10;ZCUUuggHAIAWYmElrVjQDIU+xAMAYCnOWVjB06WSYYwQDgCAOVgWVvCyKowhHgAAMSwLC3laFcaw&#10;OgAAYlgWFrB6UmMKxAMAgFhYoJTDD0sQDwBQHw5DzFTS4YclOGQBAPVhWZip5lVhDPEAAGViWZih&#10;9lVhDKsDAJSp2GWh+yRIjRd5VoXliAcA8KvYZaH7oh7Gw5IXfFaFdVgdAMCvYpeFmCWrg7VV4eKz&#10;/5Ff/+7NnR87/6PjA7/aNuIBAGyrMha6xlYHa6Eg0h8LIcIBAKCFWOjorg4iOuc7iOiuCiISjYUu&#10;4gEAsBSxMMLqqiAyLxZChAMAYA5iIcLibZ2bUBBZHgtdxAMAIKbYqyEssX6p5Nlzu0HkJR66f67E&#10;AwCkwbIwwPqqcOrMczf8/D133aLyfkJewqGLcAAAPcTCAGvnKoShINIfC6EU4SBCPABAjYiFHh5X&#10;hTGsDi3CAQDmIRZ6eF8VpiAeWsQDAMQRCx3WQkFk/aowhnBoEQ4AcCNiIWD98INImljoIh5axAMA&#10;EAs7alwVxhAOLcIBQK24z8I7LD5VMncoiIg8+tRLO/+e6ioLD7ivA4BasSy8w9qqkOPww1xLwsHr&#10;qjCGcABQMmJB7J+rYDEU+sTiodRIGEI8ACiJu1hIcbiAVUFfEw61RUIfwgGAd+5iQWT3MdJrX+RZ&#10;FdLQ+rN46PHX5bvf/qDK27KCeADgjcsTHMMX9zAcuj83xnooeKXxZ/HQ469f/+dLz1+Vr37xfavf&#10;phWcKAnAG5exEOq+2GuuDlOleqqkt1VBc02oSfjnRjgAsMjlYYipYquD9VXBUyikjoRbPnGTiMjs&#10;dSF89LbXcyeIBwAWuF8WYmKrg5ZUq4IHnpYEr+HA6gDAgqKXhSGsCuttGQrNsiCybl0Y4ikeQsQD&#10;gK0UvSykVuNJjVuvCd/7yR/k4hO3q7zPIawOABBX3bLAqrBMjkgIhcGQYl0Y4ikeQsQDAE0sCwvV&#10;tCpoXwo5phsKObE6AEBly4K1OzWK2F4Vcq8JXUvXhf0TF3h6ZoB4ADBXNcuC9adKWmItEta6dnB6&#10;5+mZWuHA6gCgFtUsC6wK43JcCjk3FJp1Ye55C7EXRVaHFvEAoE8VscBJjeO8nJew5kTHKS+EKcJB&#10;hHgA4BuxMEOJq4LHQw4p1oUhrA4twgGoV/GxwKrQz2MkNFKvC0NYHXYRD0A9iIWJUl0qmSMWvBxy&#10;iNlyXRjC6tAiHICyFR0LrAq7PK8JXbnWhRjioUU8AGUp9tJJ66GwpZIiwTIuz2xxeSZQFhPLQvg0&#10;SK0XeGuHH0S2XxVKjwSL68IQVocW8QD4YyIWQhrhYH1V8BIKuc9LGOMpFkKEQ4twAHwwFwuhMBxE&#10;psdDzatC6WtCl9dgCBEPLSufEwC7TMdC15TVodZVobZIaJQQCyHCoWXx8wPUylUshIZWB2urQupL&#10;JT3cojm1NQ+Yso54aHn4fAGlchsLXU081LQq1HBewhSlrQtDuClUy9PnDShBMbEgUs+qUOshhxgL&#10;N2naGqtDy/PnEfCgmFiwFgoi+qsCkTCslnVhCKvDrhI+p4AlRcSC9ZMaRdbHAoccxtW4LgxhdWiV&#10;+PkFtkYsBCyuCqwJ09W+LgxhddhV8ucaSMV9LFhfFZaGApGwDOvCOFaHVk2fd2CNYp8NMZfmqrAG&#10;kaDj0vNXZwXDtYPT1bxwhM+wEEm3PHjQ/ftWy9cAMJfrWNBcFbSsWRU4LwE5rHkAltdFYQgPwAL6&#10;uT4MYe1chaUnNbIm6OLcBT1D8VBaJEzB1wZq5nZZsLgqhKaEApEA67qrQ42R0GB1QM3cLgueVwVu&#10;0Zwe64Iu7XN6Hjj/qnz/7IdU32ZOfM2gdC6XBWuh0GUpFGqLBOhKEQmNyy9clTu+MC/krGJ1QOnc&#10;xYLFww/dVaEPkbCtO7/17PV1Ye6VEUgbCaXjCguUyF0saNlqVSAS/KnpMsou65Fw9lz7Pwpezp8g&#10;HlCCpOcshI+R1lgDvN2AiUsh8+MmTdPkiIRbP/0eEZHZhyLCYGh4CYeu2r7O4FfSZSF8YQ/Doftz&#10;W0t1UqP222dN0MNNmvpZXxKm6gaEl3hgdYAXmx2G6MbB3NXB4rkKoVNnniMSDArPXUArdyT84Gd/&#10;lEu/OPq8pDjR0ePhChFOlIRdJi6dnLI6WLsCIlwV7rz9ZpW3SSSkwWWULQuREGqCQeNQxFSe4iFU&#10;2tcifDFxguPY6mB5VdAIBc5LSIt1wV4k5MTqAMxnYlmIsXpSI2uCL7WuC9YjoVkWRLZdF4Z4ioeQ&#10;569R+FBNLFh5qmSDSNhWbbFgPRJCSw9FhJ8XHrvd8vj1CvtMx4LFVWEtDjnkU0MweIqExtJ1IfY5&#10;IR5aXr52YVsVseAtFIiENEqOBY+RENJYF4YQDi3rX8ewy2wslLQqEAl2lBYM3iOhkWJdGEI8tCx+&#10;TcOm4mMhZygQCfaUEgulRELj2sFpufzCVRFJsy4MIRxalr6+YY/JWPC+KnBegm1Lg8HCN9PSIiGU&#10;8lDEVMRDy8LXO+woOhYshwKRkI/HdaHkSGhseShiihThIEI8wCdzseA1FIgEX7w8YKqGSAhZWBeG&#10;sDq0CIf6mIoFj4cfOOTgk/V1QfPrd8nDnXLdcdHaujBEMxy8BkOIeChfkbGwRSgQCf5ZWxdyrwgi&#10;Nm7LbHldGDI3HkoIhCGEQ5lMPBtCxP5TJUMccihL7sdXEwn+PfrUSzv/PhQPJUdCg8dul8nMsuBp&#10;VViKvzT25FwXiIR+Xg5FTGX5e9LWrH6OMG52LKRYADyeq5ADf9H05Th3gUgY5/FQRFfK70X3PfiK&#10;vPbPt6//u9fFwtLnC3GzD0M0j4zu/pgFJYeCyPr/Pv5i5pU7EqwHQp/LL1ydHQy5pfo+dN+Drwz+&#10;3JO//bfc/bX3J3m/KfHYbT9UDkOE8TA3HFgV/Cj1L3PqdYFIWMbTupB6RegTLgtf+ux7RURcBsOQ&#10;Ur/feKVygmP4Yj9ndfB0UiNYNuYiEsqXY0WI8bow9GF1sCX5CY6xeNCOBZaFsqX8hqF5C2giQYfV&#10;Ex1zrAh9+paFRinBMIR42N7mV0OsOWQxhlhATOwbjMahCCJBn6VDEdZWhFgsiJQfDCHiIb1sl06m&#10;OATx9GO3yakv36z6NoGtEQktC+uCtUj48SN/uuHHfvnzW3t/bU3B0CAc0sgSC6nOVXj6sdvkH6+9&#10;LWe++QH1tw2kRiT0y7EuWDnUEOqLhFCKYDh7rv0+zeWZdSsyFkSEYECRHjj/ajWR0NgyFqytCCLj&#10;kRBKHQwNwqE+Wc5ZSHUFRBgLL//tvyIi8peDt0RE5FePfDTJ+wQ88fjNcumhCJE8l7aGUq0IMUPB&#10;ILI8GvqCIUQ8lK+aWBAReeNf/1v0di8/+fH1HxxQgFzfXFOsC95XhJgcwdAgHMq0aSykvq9CqlhY&#10;i9gAjiz9hqx5oqO1SNAKhK6cwRAiHsqwWSxsdQOmx376eRGxFQtrERvAkSW3f94/caG4Qw1TWQmG&#10;BuHgV3GxIHIUDCXFwlrEBqDLwqGGqawFQ4h48GOTWMhxW+cffuczIkIsaCA2gCOWV4QYy8HQIBxs&#10;KzYWur5x6pPEQibEBnAk9wuL9qWVzX/PPXfdsvhjGkI82LLJsyFyh8JaX/ncydwfQvUIDkDnhShV&#10;MDQIh1ZJ4UAsbIDYyI/YAI7sn7iQPBhCxEPLczwkjQVCQQexkR+xAcRNeSFMEQ4ixMMWrsdC8zRI&#10;zRd3YsGGawen5Y67X879YVSN2ACOhC+QrA4t6+Fww7IQPkJaZHk8EAplYd3Ii9gAjsy9CoN40DF6&#10;GCKMh6kv/kOhkGK9gA/ERl7EBuCXhXCYdc7C1NWhLxbCH1sSIKgbsZEXsQHYkSMeVp3g2PeiH1sV&#10;YmtD9+0AmoiNvIgNII2twkHtaojYWjDn/AVWB1hEbORFbADTpIoH1Usn564KS94W4BGxkR/Bgdpo&#10;hkPyWCAUgPWIjfyIDXilEQ2qhyE0QmHK7yMmgHmIjfyIDeS2JhpUYkHzxZtQAOzhxl75ERvQsDQY&#10;iAUAm2DdyIvYgEjGWCAUAGyB2MiL2CiDqVhYevnj2B0eiQUASxEbeREbNmSJhSmXSi69XXTo8PAK&#10;oQAgK2IjL2JDh5lYiL2oL71bI6EAwDtiIy9i48jmsaBxqSR3awSAaYiN/LwHx28uvilfP/v8ot97&#10;TPljmSUMBJ4RAQDDnnnxr6t+P7Gx3trLh3PFxsNPvCEf+fC7Vr2NRcuC5g2YYu9DhGgAAAuIjfzm&#10;xsa99/9dTn7s3SIi12Nhs2Vhq/MHmpMaAQD5sWzkN7Zs7O+3//ypkzepvm/VwxCcgwAA6LM2NriL&#10;aF6zYiG2Kmjda2HK+wIA1GX/xAV55sV1b4N1Y7ljqc4NWHPyIqEAANBW+6GUpecriIgcm3rzpNgN&#10;mGK/r+/HOVwBAPDGa2zce//vV7+N3qshpt5BsftjGndrnPN7AQCoxVhsdE9wfPiJP6u970mXTi65&#10;VJL7JgAAUIZkN2Xi0AMAAGUYjQWtGzBxt0YAAHyKxkKqqxKGVgeiAQAAe/bHf8muFAFBJAAAYNfg&#10;sjAUBX23YV77Ys99FQAAsGvRCY6aJy8SCgAA2NYbC3NfwDl5EQCAcqlfOjlndWBVAADAvhtiQfsF&#10;PLY6AAAA+3ZiIfX/6bMiAADgz+xLJwEAQF2uxwLnDwAAgD4sCwAAIGpfhFUBAAAMY1kAAABReyJy&#10;yKoAAACG/B/8j2Mv/nrEFAAAAABJRU5ErkJggg==&#10;"
+       id="image1"
+       x="10"
+       y="81.34375" /><text
+       xml:space="preserve"
+       style="font-size:4.23333px;fill:#000000;stroke-width:1;-inkscape-stroke:none"
+       x="30.000002"
+       y="145"
+       id="text32"><tspan
+         sodipodi:role="line"
+         id="tspan32"
+         style="stroke-width:1"
+         x="30.000002"
+         y="145">Result in openscad</tspan></text><path
+       style="fill:none;stroke:#000000;stroke-width:0.25;marker-end:url(#ConcaveTriangle-0)"
+       d="m 46.000001,138 8,-19"
+       id="path7-0"
+       sodipodi:nodetypes="cc" /></g></svg>
