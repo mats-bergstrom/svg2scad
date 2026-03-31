@@ -83,9 +83,13 @@ $ name ( arg )
 | path | path-name | Name of the variable holding the path point array. |
 | min | path-name | Name of the variable holding the path minimum point. |
 | max | path-name | Name of the variable holding the path maximum point. |
+| min2zero | path-name | scad translate command to move the path minimum point to `[0,0,0`] |
+| max2zero | path-name | scad translate command to move the path maximum point to `[0,0,0`] |
+| com2zero | path-name | scad translate command to move the path centre point to `[0,0,0`] |
 
 Example:
 ```
+$com2zero(P1) --> translate([-x_com,-y_com,0])
 $path(P1) --> s2s_P1_path
 ```
 
